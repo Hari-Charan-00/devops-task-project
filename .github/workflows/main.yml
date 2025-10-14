@@ -38,9 +38,9 @@ jobs:
         project_id: '${{ secrets.GCP_PROJECT_ID }}'
 
     - name: Deploy to Kubernetes
-      run: run: |
-        # Use sed to replace the placeholder image tag in the deployment manifest with the new one
-        sed -i 's|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world:${{ github.sha }}|' k8s/deployment.yaml
-
-        # Apply the manifests to the cluster. This will create or update the resources.
-        kubectl apply -f k8s/
+        run: |
+          # Use sed to replace the placeholder image tag in the deployment manifest with the new one
+          sed -i 's|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world:${{ github.sha }}|' k8s/deployment.yaml
+          
+          # Apply the manifests to the cluster. This will create or update the resources.
+          kubectl apply -f k8s/
