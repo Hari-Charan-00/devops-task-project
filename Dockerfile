@@ -4,7 +4,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 # Install only the dependencies needed for production
-RUN npm install --only=production
+RUN npm ci --only=production
 
 # --- Stage 2: The Final Image ---
 # We start from a fresh, clean base image
