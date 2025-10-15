@@ -8,6 +8,10 @@ image:
   # The tag is intentionally left blank. Our pipeline will set this.
   tag: ""
 
+imagePullSecrets:
+  # The name of the Kubernetes secret we just created
+  - name: docker-creds
+
 service:
   type: LoadBalancer
   port: 80
