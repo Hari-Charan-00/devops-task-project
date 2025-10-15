@@ -11,7 +11,7 @@ RUN npm ci --only=production
 FROM node:20-alpine
 WORKDIR /app
 # Copy the installed dependencies from the 'builder' stage
-COPY --from-builder /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 # Copy the application code
 COPY app.js .
 # Tell Docker the container listens on port 8080
