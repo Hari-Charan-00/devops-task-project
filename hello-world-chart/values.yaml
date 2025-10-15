@@ -1,0 +1,13 @@
+# Default values for hello-world-chart.
+
+replicaCount: 2
+
+image:
+  repository: idealboy007/hello-world
+  pullPolicy: IfNotPresent
+  # The tag is intentionally left blank. Our pipeline will set this.
+  tag: ""
+
+service:
+  type: LoadBalancer
+  port: 80

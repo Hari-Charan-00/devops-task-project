@@ -47,7 +47,7 @@ jobs:
           location: 'us-central1-c'
           project_id: '${{ secrets.GCP_PROJECT_ID }}'
 
-      - name: Deploy to Kubernetes
+      - name: Deploy to Kubernetes with Helm
         run: |
-          sed -i 's|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world:${{ github.sha }}|' k8s/deployment.yaml
-          kubectl apply -f k8s/
+          helm upgrade --install hello-world ./hello-world-chart \
+            --set image.tag=${{ github.sha }}

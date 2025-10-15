@@ -9,6 +9,8 @@ resource "google_container_cluster" "primary" {
   name     = "hello-world-cluster"
   location = "us-central1-c"
 
+  deletion_protection = false
+
   # We'll start with a small, cost-effective cluster.
   initial_node_count = 1
 
