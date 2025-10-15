@@ -1,17 +1,17 @@
 # --- Stage 1: The Builder ---
 # We use a full Node.js image to install dependencies
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-# Install only the dependencies needed for production
+# Use npm ci for faster, more reliable builds in CI/CD
 RUN npm ci --only=production
 
 # --- Stage 2: The Final Image ---
 # We start from a fresh, clean base image
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 # Copy the installed dependencies from the 'builder' stage
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from-builder /app/node_modules ./node_modules
 # Copy the application code
 COPY app.js .
 # Tell Docker the container listens on port 8080
