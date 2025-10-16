@@ -2,151 +2,64 @@
 
 ## Overview
 
-[cite_start]This repository contains a fully automated CI/CD pipeline for deploying a simple "Hello, World" Node.js web application to a managed Kubernetes cluster on Google Cloud Platform (GCP). [cite: 3] [cite_start]The entire infrastructure is managed as code using Terraform, and deployments are handled automatically by GitHub Actions upon every push to the `main` branch. [cite: 7, 10, 18]
+This repository demonstrates a complete CI/CD pipeline that automates the deployment of a simple Node.js web application. The entire process, from a code change to a live deployment on a Google Kubernetes Engine (GKE) cluster, is fully automated.
+
+The infrastructure is provisioned using Terraform, the application is containerized with Docker, and the CI/CD workflow is managed by GitHub Actions. The project also incorporates bonus tasks, including security scanning with Trivy and package management with Helm.
 
 ---
+## Project Demonstration
 
-## Features
+As requested, the cloud infrastructure used for this project has been de-provisioned to manage costs.
 
-* [cite_start]**Infrastructure as Code (IaC):** A Google Kubernetes Engine (GKE) cluster is provisioned entirely with Terraform. [cite: 10]
+I have recorded a short video to demonstrate the end-to-end workflow in action. The video shows a code change being pushed to GitHub, which automatically triggers the pipeline to build, scan, and deploy the new version to the Kubernetes cluster.
 
-* [cite_start]**Containerization:** The application is packaged into an optimized, multi-stage Docker image for size and efficiency. [cite: 12, 13]
-
-* [cite_start]**CI/CD Automation:** A GitHub Actions pipeline automates the build, push, security scan, and deployment process. [cite: 16]
-
-* [cite_start]**Helm for Packaging:** Kubernetes manifests are packaged as a Helm chart for templated, repeatable deployments. [cite: 29]
-
-* [cite_start]**Security Scanning:** The Docker image is scanned for `HIGH` and `CRITICAL` vulnerabilities using Trivy before deployment. [cite: 32]
-
-* [cite_start]**Secrets Management:** Docker Hub credentials are securely stored within the Kubernetes cluster and used for pulling the image. [cite: 30]
+**[Watch the video demonstration here](https://youtu.be/YkP0ZejNyvs)**
 
 ---
-
-## Workflow Diagram
-
-The pipeline follows a modern GitOps workflow:
-
-```mermaid
-
-graph TD
-
-    A[Developer] -- 1. git push --> B{GitHub Repository};
-
-    B -- 2. Triggers --> C[GitHub Actions Pipeline];
-
-    C --> D{Build Docker Image};
-
-    D -- 3. Push Image --> E[Docker Hub Registry];
-
-    C --> S{Scan Image w/ Trivy};
-
-    S -- 4. On Pass --> F{Deploy with Helm};
-
-    F -- 5. Pulls Image using K8s Secret --> E;
-
-    F -- 6. Applies Chart --> G[KE Cluster];
-
-    G -- 7. Creates/Updates Pods --> H[Live Application];
-
-    H -- Users Access --> I[Public IP Address];
-
-
-
-    subgraph "CI/CD Pipeline"
-
-        D
-
-        S
-
-        F
-
-    end
-
-```
-
-
-
----
-
-
-
 ## Instructions to Run
-
-
 
 ### Prerequisites
 
-
-
 * Google Cloud SDK (`gcloud`)
-
 * Terraform
-
 * Helm
-
 * A configured GCP account with billing enabled.
-
-
 
 ### Steps
 
-
-
-1.  [cite_start]**Provision the Infrastructure:** [cite: 24]
-
-    Navigate to the `terraform` directory and apply the configuration. This will create the GKE cluster.
-
-
+1.  **Provision the Infrastructure:**
+    First, navigate to the `terraform` directory and apply the configuration. This will build the GKE cluster and all necessary resources on Google Cloud.
 
     ```bash
-
     cd terraform
-
     terraform apply
-
     ```
 
-
-
-2.  [cite_start]**Create the Kubernetes Secret:** [cite: 24]
-
-    Create the Docker Hub secret in the cluster. **(Note: This is a one-time manual step)**.
-
-
+2.  **Create the Kubernetes Secret:**
+    Once the cluster is running, create a Kubernetes secret to hold the Docker Hub credentials. This is a one-time manual step that allows the cluster to pull the container image from the private registry.
 
     ```bash
-
     kubectl create secret docker-registry docker-creds \
-
       --docker-server=[https://index.docker.io/v1/](https://index.docker.io/v1/) \
-
       --docker-username=<your-dockerhub-username> \
-
       --docker-password=<your-dockerhub-password> \
-
       --docker-email=<your-email>
-
     ```
 
-
-
-3.  [cite_start]**Automated Deployment:** [cite: 24]
-
-    The GitHub Actions pipeline is configured to run automatically on every push to the `main` branch. [cite_start]It will build, scan, and deploy the application without any manual intervention. [cite: 18, 19, 20, 21]
-
+3.  **Automated Deployment:**
+    With the infrastructure in place, any `git push` to the `main` branch will automatically trigger the GitHub Actions pipeline to deploy the latest version of the application.
 
 ---
-
 ## Design Choices
 
-* [cite_start]**GKE:** I chose Google Kubernetes Engine for its simplicity and managed control plane, which reduces operational overhead. [cite: 10]
+I made several key design choices for this project to align with modern DevOps practices:
 
-* [cite_start]**Terraform:** Using Terraform for Infrastructure as Code ensures the environment is reproducible, version-controlled, and prevents configuration drift. [cite: 10]
+* **GKE for Kubernetes:** I chose Google Kubernetes Engine as the managed Kubernetes provider. Using a managed service like GKE offloads the complexity of maintaining the control plane, allowing the team to focus on the application itself.
 
-* [cite_start]**Multi-stage Dockerfile:** This approach creates a final production image that is small and secure by excluding build-time dependencies, fulfilling the optimization requirement. [cite: 13]
+* **Terraform for IaC:** All cloud infrastructure is defined as code using Terraform. This approach makes the environment fully reproducible, version-controlled, and prevents the "configuration drift" that can occur with manual setups.
 
-* **Helm:** I used Helm to package the Kubernetes manifests. [cite_start]This allows for templating and managing application releases in a clean, versionable way, which is far superior to using static YAML files or simple find-and-replace commands in a pipeline. [cite: 29]
+* **Multi-Stage Dockerfile:** To keep the final container image small and secure, I used a multi-stage Docker build. The initial stage installs dependencies and builds the application, while the final stage copies only the necessary runtime artifacts, resulting in a lean production image.
 
-* **Trivy:** Integrating a vulnerability scanner directly into the pipeline creates an automated security gate that prevents insecure code from reaching production. [cite_start]This aligns with modern "Shift-Left" security principles. [cite: 32]
+* **Helm for Package Management:** Instead of using static YAML files, I packaged the application's Kubernetes manifests into a Helm chart. This is a more robust solution that allows for templating, versioning, and easier management of application releases across different environments.
 
----
+* **Trivy for Security:** I integrated the Trivy vulnerability scanner directly into the pipeline. This creates an automated security gate that scans every new image for high-severity vulnerabilities before it can be deployed, which is a core principle of shifting security "left" in the development process.
